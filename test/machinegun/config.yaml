@@ -1,0 +1,6 @@
+namespaces:
+    sequences:
+        processor:
+            url: http://sequences:8022/v1/stateproc
+storage:
+    type: memory

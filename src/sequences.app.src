@@ -1,0 +1,16 @@
+{application, sequences, [
+    {description, "Sequence service"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        lager,
+        lager_logstash_formatter,
+        woody,
+        dmsl,
+        mg_proto
+    ]},
+    {mod, {sequences, []}},
+    {env, []}
+]}.
