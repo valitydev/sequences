@@ -22,7 +22,7 @@ new() ->
     woody_context:new().
 
 call(Function, Args, Client) ->
-    Call = {{dmsl_sequences_thrift, 'Sequences'}, Function, Args},
+    Call = {{seq_proto_sequences_thrift, 'Sequences'}, Function, Args},
     Opts = #{
         url => <<"http://sequences:8022/v1/sequences">>,
         event_handler => {woody_event_handler_default, undefined}

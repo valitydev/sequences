@@ -53,7 +53,7 @@ init([]) ->
 
 get_handler_spec(sequences) ->
     {"/v1/sequences", {
-        {dmsl_sequences_thrift, 'Sequences'},
+        {seq_proto_sequences_thrift, 'Sequences'},
         seq_handler
     }};
 
