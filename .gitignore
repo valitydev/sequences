@@ -6,6 +6,7 @@ log
 erl_crash.dump
 .tags*
 *.sublime-workspace
+.edts
 .DS_Store
 Dockerfile
 docker-compose.yml

@@ -3,8 +3,10 @@
 %% Woody handler
 
 -behaviour(woody_server_thrift_handler).
+-behaviour(woody_event_handler).
 
 -export([handle_function/4]).
+-export([handle_event/4]).
 
 %%
 
@@ -18,3 +20,11 @@ handle_function('GetCurrent', [SequenceId], Context, _Opts) ->
 handle_function('GetNext', [SequenceId], Context, _Opts) ->
     Value = seq_machine:get_next(SequenceId, Context),
     {ok, Value}.
+
+-spec handle_event(woody_event_handler:event(), woody:rpc_id(), woody_event_handler:event_meta(), woody:options()) ->
+    _.
+
+handle_event(Event, RpcID, RawMeta, _) ->
+    {Level, {Format, Args}, LogMeta} = woody_event_handler:format_event_and_meta(
+        Event, RawMeta, RpcID, [event, service, function, type, metadata]),
+    lager:log(Level, [{pid, self()}, LogMeta], Format, Args).

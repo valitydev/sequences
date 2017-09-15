@@ -38,7 +38,7 @@
   1},
  {<<"woody">>,
   {git,"git@github.com:rbkmoney/woody_erlang.git",
-       {ref,"2d00bda10454534e230d452b7338debafaf0a869"}},
+       {ref,"98147f12c76a6b5e5df3bbc162a130dadecda618"}},
   0}]}.
 [
 {pkg_hash,[
