@@ -22,9 +22,9 @@ handle_function('GetNext', [SequenceId], Context, _Opts) ->
     {ok, Value}.
 
 -spec handle_event(woody_event_handler:event(), woody:rpc_id(), woody_event_handler:event_meta(), woody:options()) ->
-    _.
+    ok.
 
 handle_event(Event, RpcID, RawMeta, _) ->
     {Level, {Format, Args}, LogMeta} = woody_event_handler:format_event_and_meta(
         Event, RawMeta, RpcID, [event, service, function, type, metadata]),
-    lager:log(Level, [{pid, self()}, LogMeta], Format, Args).
+    ok = lager:log(Level, [{pid, self()}, LogMeta], Format, Args).
