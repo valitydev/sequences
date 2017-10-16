@@ -39,7 +39,7 @@ init([]) ->
             ip            => Ip,
             port          => genlib_app:env(?MODULE, port, 8022),
             net_opts      => genlib_app:env(?MODULE, net_opts, []),
-            event_handler => seq_handler,
+            event_handler => {scoper_woody_event_handler, #{log_scope => 'rpc.server'}},
             handlers      => [
                 get_handler_spec(sequences),
                 get_handler_spec(state_processor)

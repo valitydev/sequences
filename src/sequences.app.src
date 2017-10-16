@@ -8,6 +8,7 @@
         lager,
         lager_logstash_formatter,
         woody,
+        scoper,
         seq_proto,
         mg_proto
     ]},
