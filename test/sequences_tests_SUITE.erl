@@ -33,10 +33,12 @@ init_per_suite(C) ->
         {error_logger_hwm, 600},
         {suppress_application_start_stop, true},
         {handlers, [
-            {lager_common_test_backend, warning}
+            {lager_common_test_backend, [warning, {lager_logstash_formatter, []}]}
         ]}
+    ]) ++ genlib_app:start_application_with(scoper, [
+        {storage, scoper_storage_lager}
     ]) ++ genlib_app:start_application_with(sequences, [
-        {automaton_service_url, "http://machinegun:8022/v1/automaton"}
+        {automaton_service_url, <<"http://machinegun:8022/v1/automaton">>}
     ]),
     [{suite_apps, Apps} | C].
 

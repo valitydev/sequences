@@ -27,17 +27,22 @@
 
 get_next(Id, Context) ->
     {ok, AuxState} = call_automaton_with_lazy_start('Call', Id, [?NIL], Context),
-    get_sequence_value(AuxState).
+    log_result(get_sequence_value(AuxState), "Sequence stepped").
 
 -spec get_current(id(), context()) ->
     integer().
 
 get_current(Id, Context) ->
     {ok, #'Machine'{aux_state = AuxState}} = call_automaton_with_lazy_start('GetMachine', Id, Context),
-    get_sequence_value(AuxState).
+    log_result(get_sequence_value(AuxState), "Sequence fetched").
 
 get_sequence_value(AuxState) ->
     unmarshal(AuxState).
+
+log_result(Value, Message) ->
+    ok = scoper:add_meta(#{value => Value}),
+    _ = lager:info(Message),
+    Value.
 
 %%
 
@@ -56,7 +61,10 @@ call_automaton(Function, Id, Args, Context) ->
 call_automaton(Function, Args, Context) ->
     Request = {{mg_proto_state_processing_thrift, 'Automaton'}, Function, Args},
     {ok, URL} = application:get_env(sequences, automaton_service_url),
-    Opts = #{url => URL, event_handler => {woody_event_handler_default, undefined}},
+    Opts = #{
+        url           => URL,
+        event_handler => scoper_woody_event_handler
+    },
     woody_client:call(Request, Opts, Context).
 
 call_automaton_with_lazy_start(Function, Id, Context) ->
@@ -85,13 +93,34 @@ construct_descriptor(Ref) ->
 -spec handle_function(func(), woody:args(), context(), woody:options()) ->
     {ok, term()}.
 
-handle_function('ProcessSignal', [#'SignalArgs'{signal = {init, _}}], _Context, _Opts) ->
+handle_function(Func, Args, Context, Opts) ->
+    scoper:scope(machine,
+        fun() -> handle_function_(Func, Args, Context, Opts) end
+    ).
+
+-spec handle_function_(func(), woody:args(), context(), woody:options()) ->
+    {ok, term()}.
+
+handle_function_('ProcessSignal', [Args], _Context, _Opts) ->
+    #'SignalArgs'{signal = {init, _}, machine = #'Machine'{id = ID}} = Args,
+    scoper:add_meta(#{
+        namespace => sequences,
+        id => ID,
+        activity => signal,
+        signal => init
+    }),
     {ok, #'SignalResult'{
         change = construct_change(init()),
         action = #'ComplexAction'{}
     }};
 
-handle_function('ProcessCall', [#'CallArgs'{machine = #'Machine'{aux_state = CurrentAuxState}}], _Context, _Opts) ->
+handle_function_('ProcessCall', [Args], _Context, _Opts) ->
+    #'CallArgs'{machine = #'Machine'{id = ID, aux_state = CurrentAuxState}} = Args,
+    scoper:add_meta(#{
+        namespace => sequences,
+        id => ID,
+        activity => call
+    }),
     NextAuxState = process_call(CurrentAuxState),
     {ok, #'CallResult'{
         change = construct_change(NextAuxState),

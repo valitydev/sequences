@@ -25,7 +25,7 @@ call(Function, Args, Client) ->
     Call = {{seq_proto_sequences_thrift, 'Sequences'}, Function, Args},
     Opts = #{
         url => <<"http://sequences:8022/v1/sequences">>,
-        event_handler => {woody_event_handler_default, undefined}
+        event_handler => scoper_woody_event_handler
     },
     case woody_client:call(Call, Opts, Client) of
         {ok, Response} ->

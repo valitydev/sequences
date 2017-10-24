@@ -23,6 +23,10 @@
  {<<"mimerl">>,{pkg,<<"mimerl">>,<<"1.0.2">>},2},
  {<<"ranch">>,{pkg,<<"ranch">>,<<"1.4.0">>},2},
  {<<"rfc3339">>,{pkg,<<"rfc3339">>,<<"0.9.0">>},1},
+ {<<"scoper">>,
+  {git,"git@github.com:rbkmoney/scoper.git",
+       {ref,"30d206bf791def4a0c3b50834606baabfbd1ed71"}},
+  0},
  {<<"seq_proto">>,
   {git,"git@github.com:rbkmoney/sequences-proto.git",
        {ref,"a00415f6aa4a799b9c25149034246cd6792f4742"}},
@@ -38,7 +42,7 @@
   1},
  {<<"woody">>,
   {git,"git@github.com:rbkmoney/woody_erlang.git",
-       {ref,"2d00bda10454534e230d452b7338debafaf0a869"}},
+       {ref,"ad1e91050c36d8de15f1c7d8dd8a2c682d2d158c"}},
   0}]}.
 [
 {pkg_hash,[
