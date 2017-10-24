@@ -63,7 +63,7 @@ call_automaton(Function, Args, Context) ->
     {ok, URL} = application:get_env(sequences, automaton_service_url),
     Opts = #{
         url           => URL,
-        event_handler => {scoper_woody_event_handler, #{log_scope => 'rpc.client'}}
+        event_handler => scoper_woody_event_handler
     },
     woody_client:call(Request, Opts, Context).
 
