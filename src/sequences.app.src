@@ -10,7 +10,8 @@
         woody,
         scoper,
         seq_proto,
-        mg_proto
+        mg_proto,
+        erl_health
     ]},
     {mod, {sequences, []}},
     {env, []}
