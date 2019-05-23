@@ -14,7 +14,7 @@
 %%
 
 -define(NS, <<"sequences">>).
--define(NIL, {nl, #msgpack_Nil{}}).
+-define(NIL, {nl, #mg_msgpack_Nil{}}).
 -define(INIT, 0).
 
 -type id()          :: mg_proto_base_thrift:'ID'().
@@ -33,7 +33,9 @@ get_next(Id, Context) ->
     integer().
 
 get_current(Id, Context) ->
-    {ok, #'Machine'{aux_state = AuxState}} = call_automaton_with_lazy_start('GetMachine', Id, Context),
+    {ok, Machine} = call_automaton_with_lazy_start('GetMachine', Id, Context),
+    #mg_stateproc_Machine{aux_state = EncodedAuxState} = Machine,
+    AuxState = unmarshal_state(EncodedAuxState),
     log_result(get_sequence_value(AuxState), "Sequence fetched").
 
 get_sequence_value(AuxState) ->
@@ -50,7 +52,7 @@ ensure_started(Id, Context) ->
     case call_automaton('Start', [?NS, Id, ?NIL], Context) of
         {ok, _} ->
             ok;
-        {exception, #'MachineAlreadyExists'{}} ->
+        {exception, #mg_stateproc_MachineAlreadyExists{}} ->
             ok
     end.
 
@@ -74,16 +76,16 @@ call_automaton_with_lazy_start(Function, Id, Args, Context) ->
     case call_automaton(Function, Id, Args, Context) of
         {ok, _} = Ok ->
             Ok;
-        {exception, #'MachineNotFound'{}} ->
+        {exception, #mg_stateproc_MachineNotFound{}} ->
             ok = ensure_started(Id, Context),
             call_automaton(Function, Id, Args, Context)
     end.
 
 construct_descriptor(Ref) ->
-    #'MachineDescriptor'{
+    #mg_stateproc_MachineDescriptor{
         ns = ?NS,
         ref = Ref,
-        range = #'HistoryRange'{}
+        range = #mg_stateproc_HistoryRange{}
     }.
 
 %%
@@ -102,36 +104,37 @@ handle_function(Func, Args, Context, Opts) ->
     {ok, term()}.
 
 handle_function_('ProcessSignal', [Args], _Context, _Opts) ->
-    #'SignalArgs'{signal = {init, _}, machine = #'Machine'{id = ID}} = Args,
+    #mg_stateproc_SignalArgs{signal = {init, _}, machine = #mg_stateproc_Machine{id = ID}} = Args,
     scoper:add_meta(#{
         namespace => sequences,
         id => ID,
         activity => signal,
         signal => init
     }),
-    {ok, #'SignalResult'{
+    {ok, #mg_stateproc_SignalResult{
         change = construct_change(init()),
-        action = #'ComplexAction'{}
+        action = #mg_stateproc_ComplexAction{}
     }};
 
 handle_function_('ProcessCall', [Args], _Context, _Opts) ->
-    #'CallArgs'{machine = #'Machine'{id = ID, aux_state = CurrentAuxState}} = Args,
+    #mg_stateproc_CallArgs{machine = #mg_stateproc_Machine{id = ID, aux_state = EncodedAuxState}} = Args,
     scoper:add_meta(#{
         namespace => sequences,
         id => ID,
         activity => call
     }),
+    CurrentAuxState = unmarshal_state(EncodedAuxState),
     NextAuxState = process_call(CurrentAuxState),
-    {ok, #'CallResult'{
+    {ok, #mg_stateproc_CallResult{
         change = construct_change(NextAuxState),
-        action = #'ComplexAction'{},
+        action = #mg_stateproc_ComplexAction{},
         response = NextAuxState
     }}.
 
 construct_change(State) ->
-    #'MachineStateChange'{
+    #mg_stateproc_MachineStateChange{
         events = [],
-        aux_state = State
+        aux_state = marshal_state(State)
     }.
 
 init() ->
@@ -142,6 +145,15 @@ process_call(CurrentValue) ->
     marshal(NextValue).
 
 %% Marshalling
+
+marshal_state(State) ->
+    #mg_stateproc_Content{
+        format_version = undefined,
+        data = State
+    }.
+
+unmarshal_state(#mg_stateproc_Content{format_version = undefined, data = State}) ->
+    State.
 
 marshal(Int) when is_integer(Int) ->
     {arr, [{i, 1}, {i, Int}]}.

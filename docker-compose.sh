@@ -15,7 +15,7 @@ services:
         condition: service_healthy
 
   machinegun:
-    image: dr.rbkmoney.com/rbkmoney/machinegun:1844dff663c24acdcd32f30ae3ea208f5d05a008
+    image: dr2.rbkmoney.com/rbkmoney/machinegun:90e5355f6aeb286cece66b81b1d958e0f1ee2849
     command: /opt/machinegun/bin/machinegun foreground
     volumes:
       - ./test/machinegun/config.yaml:/opt/machinegun/etc/config.yaml
@@ -24,12 +24,5 @@ services:
       interval: 5s
       timeout: 1s
       retries: 12
-
-networks:
-  default:
-    driver: bridge
-    driver_opts:
-      com.docker.network.enable_ipv6: "true"
-      com.docker.network.bridge.enable_ip_masquerade: "true"
 EOF
 

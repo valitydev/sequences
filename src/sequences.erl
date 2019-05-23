@@ -37,15 +37,17 @@ init([]) ->
     ChildSpec = woody_server:child_spec(
         ?MODULE,
         #{
-            ip            => Ip,
-            port          => genlib_app:env(?MODULE, port, 8022),
-            net_opts      => genlib_app:env(?MODULE, net_opts, []),
-            event_handler => scoper_woody_event_handler,
-            handlers      => [
+            ip             => Ip,
+            port           => genlib_app:env(?MODULE, port, 8022),
+            transport_opts => genlib_app:env(?MODULE, transport_opts, #{}),
+            protocol_opts  => genlib_app:env(?MODULE, protocol_opts, #{}),
+            event_handler  => scoper_woody_event_handler,
+            handlers       => [
                 get_handler_spec(sequences),
                 get_handler_spec(state_processor)
             ],
-            additional_routes => [erl_health_handle:get_route(HealthCheckers)]
+            additional_routes => [erl_health_handle:get_route(HealthCheckers)],
+            shutdown_timeout => genlib_app:env(?MODULE, shutdown_timeout, 0)
         }
     ),
     {ok, {
