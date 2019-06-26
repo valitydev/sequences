@@ -43,7 +43,7 @@ get_sequence_value(AuxState) ->
 
 log_result(Value, Message) ->
     ok = scoper:add_meta(#{value => Value}),
-    _ = lager:info(Message),
+    _ = logger:info(Message),
     Value.
 
 %%
