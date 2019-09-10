@@ -30,7 +30,11 @@ init_per_suite(C) ->
     Apps = genlib_app:start_application_with(scoper, [
         {storage, scoper_storage_logger}
     ]) ++ genlib_app:start_application_with(sequences, [
-        {automaton_service_url, <<"http://machinegun:8022/v1/automaton">>}
+        {services, #{
+            automaton => #{
+                url =>"http://machinegun:8022/v1/automaton"
+            }
+        }}
     ]),
     [{suite_apps, Apps} | C].
 

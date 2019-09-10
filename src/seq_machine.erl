@@ -62,11 +62,7 @@ call_automaton(Function, Id, Args, Context) ->
 
 call_automaton(Function, Args, Context) ->
     Request = {{mg_proto_state_processing_thrift, 'Automaton'}, Function, Args},
-    {ok, URL} = application:get_env(sequences, automaton_service_url),
-    Opts = #{
-        url           => URL,
-        event_handler => scoper_woody_event_handler
-    },
+    Opts = make_woody_options(automaton),
     woody_client:call(Request, Opts, Context).
 
 call_automaton_with_lazy_start(Function, Id, Context) ->
@@ -143,6 +139,13 @@ init() ->
 process_call(CurrentValue) ->
     NextValue = unmarshal(CurrentValue) + 1,
     marshal(NextValue).
+
+-spec make_woody_options(atom()) ->
+    woody_client:options().
+make_woody_options(Service) ->
+    Services = application:get_env(sequences, services, #{}),
+    #{Service := ServiceOptions} = Services,
+    ServiceOptions#{event_handler => scoper_woody_event_handler}.
 
 %% Marshalling
 
