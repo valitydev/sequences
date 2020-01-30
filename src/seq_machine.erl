@@ -101,7 +101,7 @@ handle_function(Func, Args, Context, Opts) ->
 
 handle_function_('ProcessSignal', [Args], _Context, _Opts) ->
     #mg_stateproc_SignalArgs{signal = {init, _}, machine = #mg_stateproc_Machine{id = ID}} = Args,
-    scoper:add_meta(#{
+    _ = scoper:add_meta(#{
         namespace => sequences,
         id => ID,
         activity => signal,
@@ -114,7 +114,7 @@ handle_function_('ProcessSignal', [Args], _Context, _Opts) ->
 
 handle_function_('ProcessCall', [Args], _Context, _Opts) ->
     #mg_stateproc_CallArgs{machine = #mg_stateproc_Machine{id = ID, aux_state = EncodedAuxState}} = Args,
-    scoper:add_meta(#{
+    _ = scoper:add_meta(#{
         namespace => sequences,
         id => ID,
         activity => call
@@ -125,7 +125,16 @@ handle_function_('ProcessCall', [Args], _Context, _Opts) ->
         change = construct_change(NextAuxState),
         action = #mg_stateproc_ComplexAction{},
         response = NextAuxState
-    }}.
+    }};
+
+handle_function_('ProcessRepair', [Args], _Context, _Opts) ->
+    #mg_stateproc_RepairArgs{machine = #mg_stateproc_Machine{id = ID}} = Args,
+    _ = scoper:add_meta(#{
+        namespace => sequences,
+        id => ID,
+        activity => repair
+    }),
+    throw(#mg_stateproc_RepairFailed{reason = {str, <<"No repair support">>}}).
 
 construct_change(State) ->
     #mg_stateproc_MachineStateChange{
