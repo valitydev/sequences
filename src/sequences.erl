@@ -33,7 +33,7 @@ stop() ->
 
 init([]) ->
     {ok, Ip} = inet:parse_address(genlib_app:env(?MODULE, ip, "::")),
-    HealthCheckers = genlib_app:env(?MODULE, health_checkers, []),
+    HealthCheck = genlib_app:env(?MODULE, health_check, #{}),
     ChildSpec = woody_server:child_spec(
         ?MODULE,
         #{
@@ -46,7 +46,7 @@ init([]) ->
                 get_handler_spec(sequences),
                 get_handler_spec(state_processor)
             ],
-            additional_routes => [erl_health_handle:get_route(HealthCheckers)],
+            additional_routes => [erl_health_handle:get_route(HealthCheck)],
             shutdown_timeout => genlib_app:env(?MODULE, shutdown_timeout, 0)
         }
     ),
